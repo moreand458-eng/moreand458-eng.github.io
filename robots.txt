@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://escnor-academy.vercel.app/sitemap.xml
